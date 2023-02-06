@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF=8">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://d3js.org/topojson.v3.min.js"></script>
+  <style>
+
+  </style>
+</head>
+
+<body>
+  <h1> INFO 4310 HW1 </h1>
+  <p id="vis-1">
+    hi there
+  </p>
+
+  <div id="map-div">
+    <svg id="map-svg" height="770" width="990">
+
+    </svg>
+  </div>
+
+  <script>
+    // definitions
+    const svg = d3.select("#map-svg");
+    const width = svg.attr("width");
+    const height = svg.attr("height");
+    const margins = { top: 20, right: 20, bottom: 20, left: 20 };
+    const mapWidth = width - margins.left - margins.right;
+    const mapHeight = height - margins.top - margins.bottom;
+    const map = svg.append("g")
+      .attr("transform", "translate(" + margins.left + ", " + margins.top + ")");
+    // TODO sth for colors?
+
+    // load data file
+    const requestData = async function () {
+      const sf = await d3.json("SF-Neighborhoods.geo.json");
+      console.log(sf);
+
+      // define topojson features
+      let neighborhoods = topojson.feature(sf, sf.objects.SFNeighborhoods);
+      let neighborhoodsMesh = topojson.mesh(sf, sf.objects.SFNeighborhoods);
+      console.log(neighborhoods);
+      console.log(neighborhoodsMesh);
+
+      // define projection and path
+      let projection = d3.geoMercator().fitSize([mapWidth, mapHeight], neighborhoods);
+      let path = d3.geoPath().projection(projection);
+
+      // TODO get data and map to colors
+
+      // gets the neighborhood that a coordinate is in
+      for (let i = 0; i < neighborhoods.features.length; i++) {
+        let obj = neighborhoods.features[i];
+        if (d3.geoContains(obj, [-122.4330686, 37.73743517])) {
+          console.log(obj);
+        }
+      }
+
+      // draw areas
+      map.selectAll("path.neighborhoods").data(neighborhoods.features)
+        .join("path")
+        .attr("class", "neighborhoods")
+        .attr("d", path);
+      // .attr("fill",)
+
+      // draw outlines
+      map.append("path").datum(neighborhoodsMesh)
+        .attr("class", "outline")
+        .attr("d", path)
+        .attr("stroke", "white")
+        .attr("stroke-width", 1)
+        .attr("fill", "none");
+    };
+
+    requestData();
+  </script>
+</body>
+
+</html>
